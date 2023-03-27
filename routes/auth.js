@@ -21,8 +21,11 @@ router.post("/login", async (req, res) => {
   // create a JWT token
   const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET);
 
+  // remove password from user object
+  const { password, ...userWithoutPassword } = user.toObject();
+
   // return the token and user information
-  res.json({ token, user: { _id: user._id, username: user.username } });
+  res.json({ token, user: userWithoutPassword });
 });
 
 router.post("/signup", async (req, res) => {
@@ -48,6 +51,16 @@ router.post("/signup", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error creating user" });
+  }
+});
+
+router.get("/users", async (req, res) => {
+  try {
+    const users = await User.find().select("_id username");
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error fetching users" });
   }
 });
 
